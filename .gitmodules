@@ -1,9 +1,6 @@
 [submodule "nginx"]
 	path = src/nginx
 	url = https://github.com/nginx/nginx
-[submodule "njs"]
-	path = src/nginx-njs
-	url = https://github.com/nginx/njs
 [submodule "openssl"]
 	path = src/openssl
 	url = https://github.com/quictls/openssl
