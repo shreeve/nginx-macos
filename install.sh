@@ -39,13 +39,14 @@ echo -e "\nNginx configuring...\n"
 cd src/nginx
 ln -sf auto/configure configure
 ./configure \
-  --add-module=../nginx-njs/nginx \
   --prefix=$PREFIX_NGINX \
   --with-cc-opt="-I$PREFIX_OPENSSL/include -O2 -pipe -fPIE -fPIC -Werror=format-security -D_FORTIFY_SOURCE=2" \
   --with-ld-opt="-L$PREFIX_OPENSSL/lib" \
   \
+  --with-http_realip_module \
   --with-http_ssl_module \
   --with-http_v2_module \
+  --with-ipv6 \
   ;
 
 echo -e "\nNginx building (a few minutes may pass with no output)...\n"
