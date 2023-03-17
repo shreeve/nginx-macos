@@ -1,21 +1,18 @@
 #!/usr/bin/env bash
 
-# Exit on errors
+# exit on errors
 set -e
 
-PREFIX=$PWD/build
+# everything will reside under this prefix
+PREFIX=$PWD/cheese
 PREFIX_OPENSSL=$PREFIX/openssl
-MAKE_JOBS=`sysctl -n hw.ncpu` # Faster, parallel build using number of cores
-
-# INSTALLATION DESTINATION - All files will be installed at the path below and
-# self-contained within that folder, including config, logs, etc.
 #PREFIX_NGINX=/usr/local/nginx
 PREFIX_NGINX=$PREFIX/nginx
 
-echo -e "Nginx will build and install at the location below. This should complete in < 5 minutes.\n"
-echo -e "    $PREFIX_NGINX\n"
+echo -e "This will build and install nginx at:\n"
+echo -e "  $PREFIX_NGINX\n"
 
-# EXIT without confirmation
+# request confirmation to install
 while [[ ! $REPLY =~ ^[nNyY]$ ]] ; do read -rp "Start installation? [y/n] "; done
 [[ $REPLY =~ ^[nN]$ ]] && exit 0
 
@@ -23,53 +20,64 @@ echo -e "\nInitializing Git submodules...\n"
 git submodule update --init
 git submodule --quiet foreach 'printf "%-10s %s\n" $name: `git describe --tags 2>/dev/null || echo -`'
 
-# Build Openssl once
+# use all cpu cores to build quicker
+MAKE_JOBS=`sysctl -n hw.ncpu`
+
 if [[ ! (-e $PREFIX_OPENSSL/include/openssl) ]] ; then
-  echo -e "\nOpenssl configuring...\n"
+  echo -e "\nConfiguring openssl...\n"
   cd src/openssl
   ./config --prefix=$PREFIX_OPENSSL no-shared no-threads
-  echo -e "\nOpenssl building...\n"
+
+  echo -e "\nBuilding openssl...\n"
   make 1>/dev/null --quiet --jobs=$MAKE_JOBS
-  echo -e "\nOpenssl installing...\n"
+
+  echo -e "\nInstalling openssl...\n"
   make --quiet install_sw
+
   cd ../..
 fi
 
-echo -e "\nNginx configuring...\n"
+echo -e "\nConfiguring nginx...\n"
 cd src/nginx
 ln -sf auto/configure configure
 ./configure \
   --prefix=$PREFIX_NGINX \
+  --http-client-body-temp-path=$PREFIX_NGINX/temp/client_body \
+  --http-proxy-temp-path=$PREFIX_NGINX/temp/proxy \
   --with-cc-opt="-I$PREFIX_OPENSSL/include -O2 -pipe -fPIE -fPIC -Werror=format-security -D_FORTIFY_SOURCE=2" \
   --with-ld-opt="-L$PREFIX_OPENSSL/lib" \
-  \
   --with-http_realip_module \
   --with-http_ssl_module \
   --with-http_v2_module \
-  --with-ipv6 \
+  --without-http_fastcgi_module \
+  --without-http_scgi_module \
+  --without-http_uwsgi_module \
   ;
 
-echo -e "\nNginx building (a few minutes may pass with no output)...\n"
+echo -e "\nBuilding nginx...\n"
 make 1>/dev/null --quiet --jobs=$MAKE_JOBS
 
-echo -e "\nNginx nstalling..."
+echo -e "\nInstalling nginx..."
+# mv -f conf{,-MOVED}
 make --quiet install
+# mv -f conf{-MOVED,}
+mkdir -p $PREFIX_NGINX/temp
 
 cd ../..
 
-# Remove newly-created submodule files that Git detects as "Changes not staged for commit"
-# Disable cleanup for repeated builds or changes in Nginx ./configure
+# cleanup git's newly create submodule files
+# you can disable this if repeatedly building or changing nginx's ./configure
 echo -e "Cleaning up...\n"
 git submodule foreach git clean -qfd 1>/dev/null
 
 RELATIVE_PATH=${PREFIX_NGINX#$PWD/}
-cat <<ENDGINX
+cat <<end
 ╔═══════════════════════════════════════════════════════════════════════════════
 ║
-║   🎉  Nginx was built successfully. Test commands:
+║   🎉  Nginx was successfully built. Test with these commands:
 ║
 ║           $RELATIVE_PATH/sbin/nginx -t
 ║           $RELATIVE_PATH/sbin/nginx -V
 ║
 ╚═══════════════════════════════════════════════════════════════════════════════
-ENDGINX
+end
