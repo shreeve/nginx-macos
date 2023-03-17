@@ -4,10 +4,10 @@
 set -e
 
 # everything will reside under this prefix
-PREFIX=$PWD/cheese
+PREFIX=$(realpath ..)
 PREFIX_OPENSSL=$PREFIX/openssl
-#PREFIX_NGINX=/usr/local/nginx
 PREFIX_NGINX=$PREFIX/nginx
+#PREFIX_NGINX=/usr/local/nginx
 
 echo -e "This will build and install nginx at:\n"
 echo -e "  $PREFIX_NGINX\n"
@@ -58,9 +58,10 @@ echo -e "\nBuilding nginx...\n"
 make 1>/dev/null --quiet --jobs=$MAKE_JOBS
 
 echo -e "\nInstalling nginx..."
-# mv -f conf{,-MOVED}
+[[ -d $PREFIX_NGINX/conf      ]] && mv  -f $PREFIX_NGINX/conf{,-SAFE}
 make --quiet install
-# mv -f conf{-MOVED,}
+[[ -d $PREFIX_NGINX/conf      ]] && rm -rf $PREFIX_NGINX/conf
+[[ -d $PREFIX_NGINX/conf-SAFE ]] && mv  -f $PREFIX_NGINX/conf{-SAFE,}
 mkdir -p $PREFIX_NGINX/temp
 
 cd ../..
