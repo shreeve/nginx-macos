@@ -1,6 +1,6 @@
 ## nginx-macos
 
-Builds and installs the latest [nginx](https://nginx.org/en/) for macOS.
+Builds and installs the latest [nginx](https://nginx.org/en/) for macOS
 
 ### Usage
 
