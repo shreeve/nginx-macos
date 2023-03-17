@@ -42,8 +42,8 @@ cd src/nginx
 ln -sf auto/configure configure
 ./configure \
   --prefix=$PREFIX_NGINX \
-  --http-client-body-temp-path=$PREFIX_NGINX/temp/client_body \
-  --http-proxy-temp-path=$PREFIX_NGINX/temp/proxy \
+  --http-client-body-temp-path=/tmp/nginx/client_body \
+  --http-proxy-temp-path=/tmp/nginx/proxy \
   --with-cc-opt="-I$PREFIX_OPENSSL/include -O2 -pipe -fPIE -fPIC -Werror=format-security -D_FORTIFY_SOURCE=2" \
   --with-ld-opt="-L$PREFIX_OPENSSL/lib" \
   --with-http_realip_module \
@@ -62,7 +62,6 @@ echo -e "\nInstalling nginx..."
 make --quiet install
 [[ -d $PREFIX_NGINX/conf      ]] && rm -rf $PREFIX_NGINX/conf
 [[ -d $PREFIX_NGINX/conf-SAFE ]] && mv  -f $PREFIX_NGINX/conf{-SAFE,}
-mkdir -p $PREFIX_NGINX/temp
 
 cd ../..
 
