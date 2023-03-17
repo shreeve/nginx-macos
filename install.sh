@@ -62,6 +62,7 @@ echo -e "\nInstalling nginx..."
 make --quiet install
 [[ -d $PREFIX_NGINX/conf      ]] && rm -rf $PREFIX_NGINX/conf
 [[ -d $PREFIX_NGINX/conf-SAFE ]] && mv  -f $PREFIX_NGINX/conf{-SAFE,}
+mkdir -p /tmp/nginx
 
 cd ../..
 
