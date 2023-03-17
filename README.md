@@ -1,10 +1,10 @@
-Builds and installs the latest versions of [Nginx](https://nginx.org/en/) and the [Nginx JavaScript module (njs)](https://nginx.org/en/docs/njs/) for MacOS.
+## nginx-macos
 
-Explicitly supports njs JavaScript modules [`ngx_http_js_module`](https://nginx.org/en/docs/http/ngx_http_js_module.html) and [`ngx_stream_js_module`](https://nginx.org/en/docs/stream/ngx_stream_js_module.html).
+Builds and installs the latest [nginx](https://nginx.org/en/) for macOS.
 
-## Usage
+### Usage
 
 ```sh
-./install.sh            # Compile and install Nginx
-build/nginx/sbin/nginx  # Start Nginx server
+./install.sh # compile and install nginx
+sudo ../nginx/sbin/nginx # start nginx
 ```
